@@ -1,37 +1,56 @@
 # 123云盘开放平台 123云盘直链鉴权 Python 代码示例
 
 #### 介绍
-123云盘开放平台和123云盘直链鉴权示例。
+123云盘开放平台和123云盘直链鉴权示例。注意：此仓库并非官方仓库，详细说明请查看下方链接：
 
-#### 软件架构
-软件架构说明
++ 官方的开放平台文档：[https://123yunpan.yuque.com/org-wiki-123yunpan-muaork/cr6ced](https://123yunpan.yuque.com/org-wiki-123yunpan-muaork/cr6ced)
++ 官方直链鉴权：[https://www.123pan.com/faq?problem=dev_guide](https://www.123pan.com/faq?problem=dev_guide)
++ 123pan 官方 gitee 账号：[https://gitee.com/pan123-git](https://gitee.com/pan123-git)
 
+代码中的URL鉴权来自：[https://gitee.com/pan123-git/123pan-link/issues/I7QXI8](https://gitee.com/pan123-git/123pan-link/issues/I7QXI8)
 
-#### 安装教程
+#### 使用示例
+***注：由于 Python 等其它编程语言不支持数字开头的模块（变量）名，所以代码中的所有关于“123pan”的字段，均使用“pan123”来称呼。**
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
++ 直链鉴权示例
 
-#### 使用说明
+```python
+from pan123 import get_direct_signed_link
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+# 待签名URL
+origin_url = 'http://vip.123pan.com/10/layout1/layout2/%E6%88%91.txt'
+# 鉴权密钥
+primary_key = 'mykey'
+# 账号id
+uid = 10
+# 防盗链过期时间间隔(秒)，60秒会导致链接失效
+expire_time_sec = 3 * 60
+url = get_direct_signed_link(origin_url, uid, primary_key, expire_time_sec)
+```
 
-#### 参与贡献
++ 开发平台示例
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+初始化：
 
+```python
+from pan123 import pan123openAPI
 
-#### 特技
+# 自动获取 access_token
+pan123 = pan123openAPI("your clientID", "your clientSecret")
+pan123.refresh_access_token()
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+# 手动设置 access_token
+pan123 = pan123openAPI()
+pan123.refresh_access_token("your access token")
+```
+
+获取服务器信息：
+
+```python
+# 请求获取
+data = pan123.refresh_access_token().data
+print(data['accessToken'])  # eyJhb...
+print(data['expiredAt'])  # 2024-03-22T19:52:23+08:00
+```
+
+***此处不一一列举，代码中有非常详尽的注释。***
