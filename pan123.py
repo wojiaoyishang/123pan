@@ -7,7 +7,7 @@ import urllib.parse
 from typing import List, Union
 
 
-def direct_link_sign(url, uid, primary_key, expired_time_sec):
+def get_direct_signed_link(url, uid, primary_key, expired_time_sec):
     """
     进行直链鉴权。
 
