@@ -771,21 +771,28 @@ class _File:
 
         return data_response
 
-    def upload(self, filename_or_io, upload_name, parentFileID, callback=None):
+    def upload(self, filename_or_io, upload_name, parentFileID, upload_method=None, callback=None):
         """
         上传文件。重名或其他问题会报错。 callback 返回 False 时，报错。
 
         :param filename_or_io: 文件名或字节流。
         :param upload_name: 上传的文件名。
         :param parentFileID: 上传的父目录ID。
+        :param upload_method: 上传数据用的函数，默认采用 requests.post 。参考：
+                            def upload_method(url, data):
+                                 requests.put(url, data=data)
         :param callback: 函数回调，每次请求服务器时都会调用。callback(step, data_response, upload_progress)
                         step 是一个步骤标记， 0 -- 请求创建文件  1 -- 获取上传地址  2 -- 上传数据  3 -- 请求上传完成  4 -- 轮询查询上传是否完毕
-                        upload_progress 参数是一个字典， 包含 uploaded_size （已上传大小） 、 total_size （总大小）
+                        upload_progress 参数是一个字典， 包含 sliceNo（当前部分） 、 sliceNo_all（全部部分）、uploaded_size （已上传大小） 、 total_size （总大小）
         :return: 上传成功，返回文件 ID 。否则返回 -1 。
         """
         if callback is None:
             def callback(*args):
                 return True
+
+        if upload_method is None:
+            def upload_method(url, data):
+                requests.put(url, data=data)
 
         if isinstance(filename_or_io, str):
             f = open(filename_or_io, "rb")
@@ -800,7 +807,6 @@ class _File:
 
         # 创建文件
         data_response = self.create(parentFileID=parentFileID, filename=upload_name, etag=file_etag, size=file_size)
-        assert callback(0, data_response, {"uploaded_size": 0, "total_size": file_size})
 
         if data_response.code != 0:
             raise ValueError(data_response.message)
@@ -818,20 +824,29 @@ class _File:
         # 统计已上传大小
         uploaded_size = 0
 
+        assert callback(0, data_response, {"sliceNo": sliceNo, "sliceNo_total": total_sliceNo, "uploaded_size": 0,
+                                           "total_size": file_size})
+
         while sliceNo <= total_sliceNo:
             data_response = self.get_upload_url(preuploadID, sliceNo)
-            assert callback(1, data_response, {"uploaded_size": uploaded_size, "total_size": file_size})
+            assert callback(1, data_response,
+                            {"sliceNo": sliceNo, "sliceNo_total": total_sliceNo, "uploaded_size": uploaded_size,
+                             "total_size": file_size})
             presignedURL = data_response.data['presignedURL']
 
             file_data = f.read(sliceSize)
             uploaded_size += len(file_data)
-            requests.put(presignedURL, data=file_data)
-            assert callback(2, data_response, {"uploaded_size": uploaded_size, "total_size": file_size})
+            upload_method(presignedURL, file_data)
+            assert callback(2, data_response,
+                            {"sliceNo": sliceNo, "sliceNo_total": total_sliceNo, "uploaded_size": uploaded_size,
+                             "total_size": file_size})
 
             sliceNo += 1
 
         data_response = self.upload_complete(preuploadID)
-        assert callback(3, data_response, {"uploaded_size": uploaded_size, "total_size": file_size})
+        assert callback(3, data_response,
+                        {"sliceNo": sliceNo, "sliceNo_total": total_sliceNo, "uploaded_size": uploaded_size,
+                         "total_size": file_size})
 
         if data_response.data['completed']:
             return data_response.data['fileID']
@@ -840,7 +855,9 @@ class _File:
             while True:
                 time.sleep(1)
                 data_response = self.upload_async_result(preuploadID)
-                assert callback(4, data_response, {"uploaded_size": uploaded_size, "total_size": file_size})
+                assert callback(4, data_response,
+                                {"sliceNo": sliceNo, "sliceNo_total": total_sliceNo, "uploaded_size": uploaded_size,
+                                 "total_size": file_size})
 
                 if data_response.data['completed']:
                     return data_response.data['fileID']
