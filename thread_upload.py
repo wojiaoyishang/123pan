@@ -60,10 +60,10 @@ def upload(filename, upload_name, parentFileID):
 
             sliceNo += 1
         while True:
+            print("\r文件上传进度：", task_upload_per, end="")
             if len(wait(task_list, timeout=1).done) == len(task_list):
                 print()
                 break
-            print("\r文件上传进度：", task_upload_per, end="")
 
     data_response = pan123.file.upload_complete(preuploadID)
 
