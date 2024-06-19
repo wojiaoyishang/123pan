@@ -257,7 +257,7 @@ class _Link:
         self.baseurl = super_pan123.baseurl
         self.request = super_pan123.request
 
-    def offine_download(self, url: str, fileName=None, callBackUrl=None) -> DataResponse:
+    def offline_download(self, url: str, fileName=None, callBackUrl=None) -> DataResponse:
         """
         创建离线下载任务。
 
