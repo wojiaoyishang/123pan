@@ -1,7 +1,7 @@
 # 123云盘开放平台 123云盘直链鉴权 Python 代码示例
 
 #### 介绍
-123云盘开放平台和123云盘直链鉴权示例。注意：此仓库并非官方仓库，详细说明请查看下方链接：
+123云盘开放平台和123云盘直链鉴权示例。注意：此仓库并非官方仓库，详细说明请查看下方链接： 
 
 + 官方的开放平台文档：[https://123yunpan.yuque.com/org-wiki-123yunpan-muaork/cr6ced](https://123yunpan.yuque.com/org-wiki-123yunpan-muaork/cr6ced)
 + 官方直链鉴权：[https://www.123pan.com/faq?problem=dev_guide](https://www.123pan.com/faq?problem=dev_guide)
